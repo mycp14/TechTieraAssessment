@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WebApp.Data.Entities
 {
-    public class Transaction
+    public class Transaction : BaseEntity
     {
         public string TransactionId { get; set; }
         public decimal Amount { get; set; }
