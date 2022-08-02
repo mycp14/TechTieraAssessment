@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApp.Data.Context;
+using WebApp.Repository.Impl;
+using WebApp.Repository.Interface;
 
 namespace WebApp
 {
@@ -27,6 +29,9 @@ namespace WebApp
         {
             services.AddControllersWithViews();
             services.AddDbContext<WebAppContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WebAppContext")));
+
+            // configure DI for application services
+            services.AddTransient(typeof(IUnitOfWork), typeof(UnitOfWork));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
