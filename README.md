@@ -8,7 +8,7 @@ Change SQL Credentials:
 
 Step-by-Step EF Core Code first migration
 1. In the Visual Studio header, under tools look the nuget package manager then click the "Package Manager Console".
-2. On the Package Manager Console. 
+2. On the Package Manager Console.
 	a. Kindly see the "Default project" and you must select the "WebApp.Data".
 	b. Type the following script for generating and updating db context.
 		1. add-migration updatedDB
