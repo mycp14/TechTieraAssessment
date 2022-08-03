@@ -2,6 +2,8 @@
 
 I created different project for the API for the getting transaction list and asp.net core mvc razor for the uploading file (csv and xml).
 
+I also added the sample file both csv and xml located in WebApp sample file folder.
+
 Change SQL Credentials:
 1. Open appsettings.json.
 2. Look for the "connectionString" then change you're sql credentials.
