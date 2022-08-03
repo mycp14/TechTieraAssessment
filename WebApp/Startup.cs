@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using WebApp.Data.Context;
 using WebApp.Repository.Impl;
 using WebApp.Repository.Interface;
+using WebApp.Service.IService;
+using WebApp.Service.Service;
 
 namespace WebApp
 {
@@ -32,6 +34,7 @@ namespace WebApp
 
             // configure DI for application services
             services.AddTransient(typeof(IUnitOfWork), typeof(UnitOfWork));
+            services.AddTransient(typeof(ITransactionService), typeof(TransactionService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

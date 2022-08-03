@@ -36,7 +36,7 @@ namespace WebAPI
 
             // configure DI for application services
             services.AddTransient(typeof(IUnitOfWork), typeof(UnitOfWork));
-            services.AddScoped(typeof(ITransactionService), typeof(TransactionService));
+            services.AddTransient(typeof(ITransactionService), typeof(TransactionService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

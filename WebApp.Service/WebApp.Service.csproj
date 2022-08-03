@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ISO.4217.CurrencyCodes" Version="1.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WebApp.Data\WebApp.Data.csproj" />
     <ProjectReference Include="..\WebApp.Repository\WebApp.Repository.csproj" />
   </ItemGroup>
