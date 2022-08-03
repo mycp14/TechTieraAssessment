@@ -47,7 +47,6 @@ namespace WebApp.Controllers
             //less than or equal to 1MB only
             if (files.Length <= 1000000)
             {
-                var vm = new UploadTransactionViewModel();
                 if (files.FileName.EndsWith(".csv"))
                 {
                     using (var sreader = new StreamReader(files.OpenReadStream()))
@@ -55,6 +54,7 @@ namespace WebApp.Controllers
                         string[] headers = sreader.ReadLine().Split(',');     //Title
                         while (!sreader.EndOfStream)                          //get all the content in rows 
                         {
+                            var vm = new UploadTransactionViewModel();
                             string[] rows = sreader.ReadLine().Split(',');
                             vm.TransactionId = rows[0].ToString().TrimStart();
                             vm.Amount = rows[1].ToString().TrimStart();
@@ -87,6 +87,7 @@ namespace WebApp.Controllers
                         var transactionResult = (Transactions) serializer.Deserialize(files.OpenReadStream());
                         foreach (var data in transactionResult.Transaction)
                         {
+                            var vm = new UploadTransactionViewModel();
                             vm.TransactionId = data.TransactionId;
                             vm.TransactionDate = data.TransactionDate;
                             vm.Status = data.Status;

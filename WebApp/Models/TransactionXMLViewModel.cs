@@ -9,29 +9,29 @@ namespace WebApp.Models
     public class Transactions
     {
         [XmlElement(ElementName = "Transaction")]
-        public List<TransactionDetailXMLViewModel> Transaction { get; set; }
+        public List<Transaction> Transaction { get; set; }
     }
-    public class TransactionDetailXMLViewModel
+    public class Transaction
     {
         [XmlAttribute(AttributeName = "id")]
         public string TransactionId { get; set; }
 
-        [XmlAttribute(AttributeName = "TransactionDate")]
+        //[XmlAttribute(AttributeName = "TransactionDate")]
         public string TransactionDate { get; set; }
 
-        [XmlElement(ElementName = "PaymentDetails")]
+        //[XmlElement(ElementName = "PaymentDetails")]
         public PaymentDetails PaymentDetails { get; set; }
 
-        [XmlAttribute(AttributeName = "Status")]
+        //[XmlAttribute(AttributeName = "Status")]
         public string Status { get; set; }
     }
     public class PaymentDetails
     {
 
-        [XmlAttribute(AttributeName = "Amount")]
+        //[XmlAttribute(AttributeName = "Amount")]
         public string Amount { get; set; }
 
-        [XmlAttribute(AttributeName = "CurrencyCode")]
+        //[XmlAttribute(AttributeName = "CurrencyCode")]
         public string CurrencyCode { get; set; }
     }
 }
