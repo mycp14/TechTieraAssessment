@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -42,6 +43,7 @@ namespace WebApp.Controllers
                 TempData["ErrorMessage"] = "Unknown format!";
                 return View();
             }
+            var list = new List<UploadTransactionViewModel>();
             //less than or equal to 1MB only
             if (files.Length <= 1000000)
             {
@@ -54,41 +56,26 @@ namespace WebApp.Controllers
                         while (!sreader.EndOfStream)                          //get all the content in rows 
                         {
                             string[] rows = sreader.ReadLine().Split(',');
-                            if (_transactionService.isEmptyField(rows[0].ToString()) || _transactionService.isEmptyField(rows[1].ToString()) 
-                                || _transactionService.isEmptyField(rows[2].ToString()) || _transactionService.isEmptyField(rows[3].ToString()) 
-                                || _transactionService.isEmptyField(rows[4].ToString()) || rows[0].ToString().Length > 50)
-                            {
-                                TempData["ErrorMessage"] = "All fields are required!";
-                                return View();
-                            }
                             vm.TransactionId = rows[0].ToString().TrimStart();
-                            decimal decimalVal = 0;
-                            try
-                            {
-                                decimalVal = Convert.ToDecimal(rows[1].ToString().TrimStart());
-                                vm.Amount = decimalVal;
-                            }
-                            catch (FormatException)
-                            {
-                                TempData["ErrorMessage"] = "The amount is not formatted as a decimal.";
-                                return View();
-                            }
-
-                            if (!_transactionService.IsValidCurrency(rows[2].ToString().TrimStart()))
-                            {
-                                TempData["ErrorMessage"] = "Invalid currency code";
-                                return View();
-                            }
+                            vm.Amount = rows[1].ToString().TrimStart();
                             vm.CurrencyCode = rows[2].ToString().TrimStart();
-                            vm.TransactionDate = DateTime.Parse(rows[3].ToString().TrimStart());
-                            if (_transactionService.IsValidStatus(rows[4].ToString().TrimStart()))
-                            {
-                                TempData["ErrorMessage"] = "Invalid Status";
-                                return View();
-                            }
+                            vm.TransactionDate = rows[3].ToString().TrimStart(); //DateTime.Parse(rows[3].ToString().TrimStart());
                             vm.Status = rows[4].ToString().TrimStart();
-
-                            _transactionService.Save(vm);
+                            var errorMessage = new List<string>();
+                            if (!_transactionService.ValidateFields(vm, out errorMessage))
+                            {
+                                string message = "";
+                                foreach(var error in errorMessage)
+                                {
+                                    message = $"{message} {Environment.NewLine} {error}. ";
+                                }
+                                if (!string.IsNullOrEmpty(message))
+                                {
+                                    TempData["ErrorMessage"] = message;
+                                    return View();
+                                }
+                            }
+                            list.Add(vm);
                         }
                     }
                 }
@@ -96,41 +83,37 @@ namespace WebApp.Controllers
                 {
                     try
                     {
-                        var serializer = new XmlSerializer(typeof(TransactionXMLViewModel));
-                        var transactionResult = serializer.Deserialize(files.OpenReadStream());
+                        var serializer = new XmlSerializer(typeof(Transactions));
+                        var transactionResult = (Transactions) serializer.Deserialize(files.OpenReadStream());
+                        foreach (var data in transactionResult.Transaction)
+                        {
+                            vm.TransactionId = data.TransactionId;
+                            vm.TransactionDate = data.TransactionDate;
+                            vm.Status = data.Status;
+                            vm.Amount = data.PaymentDetails.Amount;
+                            vm.CurrencyCode = data.PaymentDetails.CurrencyCode;
+                            var errorMessage = new List<string>();
+                            if (!_transactionService.ValidateFields(vm, out errorMessage))
+                            {
+                                string message = "";
+                                foreach (var error in errorMessage)
+                                {
+                                    message = $"{message} {Environment.NewLine} {error}. ";
+                                }
+                                if (!string.IsNullOrEmpty(message))
+                                {
+                                    TempData["ErrorMessage"] = message;
+                                    return View();
+                                }
+                            }
+                            list.Add(vm);
+                        }
 
-                        
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.GetBaseException());
                     }
-                    //using (var ms = new MemoryStream())
-                    //{
-                    //    files.CopyTo(ms);
-                    //    var fileBytes = ms.ToArray();
-                    //    string s = Convert.ToBase64String(fileBytes);
-                    //    // act on the Base64 data
-                    //    using (XmlReader reader = XmlReader.Create(ms))
-                    //    {
-                    //        while (reader.Read())
-                    //        {
-                    //            if (reader.IsStartElement())
-                    //            {
-                    //                //return only when you have START tag  
-                    //                switch (reader.NodeType)
-                    //                {
-                    //                    case XmlNodeType.Element:
-                    //                        Console.WriteLine("Name of the Element is : " + reader.Name);
-                    //                        break;
-                    //                    //case "TransactionDate":
-                    //                    //    Console.WriteLine("Your Location is : " + reader.ReadString());
-                    //                    //    break;
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
 
                 }
             }
@@ -142,6 +125,7 @@ namespace WebApp.Controllers
             // process uploaded files
             // Don't rely on or trust the FileName property without validation.
             TempData["ErrorMessage"] = "Upload Success!";
+            _transactionService.Save(list);
             return View();
         }
         public IActionResult Privacy()

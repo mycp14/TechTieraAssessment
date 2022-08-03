@@ -66,45 +66,56 @@ namespace WebApp.Service.Service
 
             return temp;
         }
-        public bool IsValidStatus(string status)
+        private bool IsValidStatus(string status)
         {
             bool temp = false;
-
-            switch (status.ToLowerInvariant())
+            if (!isEmptyField(status))
             {
-                case "approved":
-                    temp = true;
-                    break;
-                case "rejected":
-                    temp = true;
-                    break;
-                case "done":
-                    temp = true;
-                    break;
-                default:
-                    temp = false;
-                    break;
+                switch (status.ToLowerInvariant())
+                {
+                    case "approved":
+                        temp = true;
+                        break;
+                    case "failed":
+                        temp = true;
+                        break;
+                    case "finished":
+                        temp = true;
+                        break;
+                    case "rejected":
+                        temp = true;
+                        break;
+                    case "done":
+                        temp = true;
+                        break;
+                    default:
+                        temp = false;
+                        break;
+                }
             }
 
             return temp;
         }
-        public bool Save(UploadTransactionViewModel viewModel)
+        public bool Save(List<UploadTransactionViewModel> viewModel)
         {
             try
             {
                 //manual mapping
-                var transaction = new Transaction
+                foreach (var vm in viewModel)
                 {
-                    TransactionId = viewModel.TransactionId,
-                    Amount = viewModel.Amount,
-                    TransactionDate = viewModel.TransactionDate,
-                    CurrencyCode = viewModel.CurrencyCode,
-                    Status = viewModel.Status,
-                    CreatedDate = DateTime.Now,
-                };
+                    var transaction = new Transaction
+                    {
+                        TransactionId = vm.TransactionId,
+                        Amount = Convert.ToDecimal(vm.Amount), //viewModel.Amount,
+                        TransactionDate = DateTime.Parse(vm.TransactionDate),
+                        CurrencyCode = vm.CurrencyCode,
+                        Status = vm.Status,
+                        CreatedDate = DateTime.Now,
+                    };
+                    _unitOfWork.Repository<Transaction>().Add(transaction);
+                    _unitOfWork.Save();
+                }
 
-                _unitOfWork.Repository<Transaction>().Add(transaction);
-                _unitOfWork.Save();
 
                 return true;
             }
@@ -114,7 +125,7 @@ namespace WebApp.Service.Service
             }
         }
 
-        public bool isEmptyField(string val)
+        private bool isEmptyField(string val)
         {
             if (string.IsNullOrEmpty(val))
             {
@@ -122,21 +133,66 @@ namespace WebApp.Service.Service
             }
             return false;
         }
-        public bool IsValidCurrency(string code)
+        private bool IsValidCurrency(string code)
         {
-            //RegionInfo region = CultureInfo
-            //    .GetCultures(CultureTypes.SpecificCultures)
-            //    .Select(ct => new RegionInfo(ct.LCID))
-            //    .Where(ri => ri.ISOCurrencySymbol == currency).FirstOrDefault();
-            var currencies = CurrencyCodesResolver.GetCurrenciesByCode(code);
-            if (currencies.Count() > 0)
+            if (!isEmptyField(code))
             {
-                return true;
+                var currencies = CurrencyCodesResolver.GetCurrenciesByCode(code);
+                if (currencies.Count() > 0)
+                {
+                    return true;
+                }
             }
-            else
+            return false;
+        }
+        public bool ValidateFields(UploadTransactionViewModel vm, out List<string> errorMessage)
+        {
+            bool isValid = true;
+            errorMessage = new List<string>();
+
+            if (isEmptyField(vm.TransactionId))
             {
-                return false;
+                errorMessage.Add("Transaction Id is empty");
             }
+            if (isEmptyField(vm.TransactionDate))
+            {
+                errorMessage.Add("Transaction date is empty");
+            }
+            if (isEmptyField(vm.Status))
+            {
+                errorMessage.Add("Status is empty");
+            }
+            if (isEmptyField(vm.Amount))
+            {
+                errorMessage.Add("Amount is empty");
+            }
+            if (isEmptyField(vm.CurrencyCode))
+            {
+                errorMessage.Add("Currency code is empty");
+            }
+            try
+            {
+                decimal temp = Convert.ToDecimal(vm.Amount);
+            }
+            catch (FormatException)
+            {
+                errorMessage.Add("The amount is not formatted as a decimal.");
+            }
+            if (!IsValidCurrency(vm.CurrencyCode))
+            {
+                errorMessage.Add("Invalid currency code");
+            }
+            if (!IsValidStatus(vm.Status))
+            {
+                errorMessage.Add("Invalid status");
+            }
+
+            if (errorMessage != null)
+            {
+                isValid = false;
+            }
+
+            return isValid;
         }
     }
 }

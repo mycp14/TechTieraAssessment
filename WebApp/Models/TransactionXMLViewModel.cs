@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 namespace WebApp.Models
 {
-    public class TransactionXMLViewModel
+    public class Transactions
     {
         [XmlElement(ElementName = "Transaction")]
         public List<TransactionDetailXMLViewModel> Transaction { get; set; }
@@ -14,18 +14,18 @@ namespace WebApp.Models
     public class TransactionDetailXMLViewModel
     {
         [XmlAttribute(AttributeName = "id")]
-        public string id { get; set; }
+        public string TransactionId { get; set; }
 
         [XmlAttribute(AttributeName = "TransactionDate")]
         public string TransactionDate { get; set; }
 
         [XmlElement(ElementName = "PaymentDetails")]
-        public PaymentDetailXMLViewModel PaymentDetails { get; set; }
+        public PaymentDetails PaymentDetails { get; set; }
 
         [XmlAttribute(AttributeName = "Status")]
         public string Status { get; set; }
     }
-    public class PaymentDetailXMLViewModel
+    public class PaymentDetails
     {
 
         [XmlAttribute(AttributeName = "Amount")]

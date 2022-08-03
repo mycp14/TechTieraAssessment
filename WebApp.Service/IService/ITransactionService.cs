@@ -8,9 +8,8 @@ namespace WebApp.Service.IService
     public interface ITransactionService
     {
         IList<TransactionViewModel> GetAll();
-        bool Save(UploadTransactionViewModel viewModel);
-        bool isEmptyField(string val);
-        bool IsValidCurrency(string currency);
-        bool IsValidStatus(string status);
+        bool Save(List<UploadTransactionViewModel> viewModel);
+        bool ValidateFields(UploadTransactionViewModel vm, out List<string> errorMessage);
+
     }
 }
