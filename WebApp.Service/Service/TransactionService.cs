@@ -56,6 +56,7 @@ namespace WebApp.Service.Service
                 case "approved":
                     temp = "A";
                     break;
+                case "failed":
                 case "rejected":
                     temp = "R";
                     break;
